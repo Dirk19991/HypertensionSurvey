@@ -1,5 +1,6 @@
 import Dialog from '@mui/material/Dialog';
 import styles from './Modal.module.scss';
+import { declineWord } from './declineWord';
 
 interface ModalProps {
   open: boolean;
@@ -19,6 +20,8 @@ export default function Modal({ open, setOpen, points }: ModalProps) {
       'У вас серьезный риск гипертонии. Советуем обратиться за консультацией к врачу';
   }
 
+  const pointsWord = declineWord(points, 'балл', 'балла', 'баллов');
+
   return (
     <div>
       <Dialog
@@ -33,7 +36,7 @@ export default function Modal({ open, setOpen, points }: ModalProps) {
         }}
       >
         <div className={styles.wrapper}>
-          <div>Ваш результат: {points} баллов</div>
+          <div>Ваш результат: {pointsWord}</div>
           <div className={styles.message}>{message}</div>
           <button className={styles.button} onClick={() => setOpen(false)}>
             OK
