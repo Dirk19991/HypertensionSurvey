@@ -175,6 +175,7 @@ function App() {
                   />
                 ) : (
                   <select
+                    className={styles.select}
                     defaultValue={''}
                     {...register(`q${index}`, { required: true })}
                   >
