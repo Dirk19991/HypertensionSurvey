@@ -3,10 +3,6 @@ import styles from './App.module.scss';
 import Modal from './Modal';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-interface Responses {
-  [key: string]: string;
-}
-
 interface Questions {
   [key: string]: {
     question: string;
@@ -26,7 +22,6 @@ function App() {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
 
