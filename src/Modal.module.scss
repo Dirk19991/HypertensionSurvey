@@ -1,0 +1,31 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 700px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 20px;
+  color: rgb(32, 82, 98);
+  font-size: 22.4px;
+  font-weight: 500;
+  font-family: Carlito, sans-serif;
+  text-align: center;
+
+  @media screen and (max-width: 768px) {
+    font-size: 16px;
+  }
+}
+
+.button {
+  padding: 5px 20px;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 15px;
+}

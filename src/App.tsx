@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import styles from './App.module.css';
+import styles from './App.module.scss';
+import Modal from './Modal';
 
 interface Responses {
   [key: string]: string;
@@ -8,7 +9,8 @@ interface Responses {
 interface Questions {
   [key: string]: {
     question: string;
-    answers: {
+    description?: string | string[];
+    answers?: {
       answer: string;
       points: number;
     }[];
@@ -17,14 +19,25 @@ interface Questions {
 
 function App() {
   const [responses, setResponses] = useState<Responses>({
+    q0: '',
     q1: '',
     q2: '',
     q3: '',
     q4: '',
     q5: '',
+    q6: '',
+    q7: '',
+    q8: '',
+    q9: '',
+    q10: '',
   });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [points, setPoints] = useState(0);
 
   const questions: Questions = {
+    q0: {
+      question: 'Введите имя и фамилию',
+    },
     q1: {
       question: 'Укажите Ваш возраст',
       answers: [
@@ -37,31 +50,97 @@ function App() {
     },
     q2: {
       question:
-        'ЕСТЬ/БЫЛИ У ВАШИХ РОДСТВЕННИКОВ СЕРДЕЧНО-СОСУДИСТЫЕ ЗАБОЛЕВАНИЯ (гипертоническая болезнь, ишемическая болезнь сердца, инфаркт миокарда)?',
+        'Были ли у Ваших родственников сердечно-сосудистые заболевания (гипертоническая болезнь, ишемическая болезнь сердца, инфаркт миокарда)?',
       answers: [
-        { answer: 'Да', points: 0 },
-        { answer: 'Нет', points: 1 },
+        { answer: 'Да', points: 1 },
+        { answer: 'Нет', points: 0 },
       ],
     },
     q3: {
-      question: 'СТРАДАЕТЕ ЛИ ВЫ САХАРНЫМ ДИАБЕТОМ ИЛИ ХРОНИЧЕСКОЙ ПОЧЕЧНОЙ НЕДОСТАТОЧНОСТЬЮ?',
+      question:
+        'Страдаете ли Вы сахарным диабетом или почечной недостаточностью?',
       answers: [
-        { answer: 'Да', points: 0 },
-        { answer: 'Нет', points: 1 },
+        { answer: 'Да', points: 1 },
+        { answer: 'Нет', points: 0 },
       ],
     },
     q4: {
       question: 'Вы курите?',
       answers: [
+        { answer: 'Да', points: 1 },
+        { answer: 'Нет', points: 0 },
+      ],
+    },
+    q5: {
+      question: 'Носит ли Ваша жизнь стрессовый характер?',
+      answers: [
+        { answer: 'Да', points: 1 },
+        { answer: 'Нет', points: 0 },
+      ],
+    },
+    q6: {
+      question: 'Правильно ли Вы питаетесь?',
+      answers: [
+        {
+          answer:
+            'Питаюсь в одно  тоже время, до 4-5 раз в сутки, соблюдаю солевой и питьевой режим.',
+          points: 0,
+        },
+        {
+          answer: 'Иногда употребляю вредную пищу (жареное, копченое, соленое)',
+          points: 1,
+        },
+        { answer: 'Я себя не ограничиваю в питании', points: 2 },
+      ],
+    },
+    q7: {
+      question:
+        'Рассчитайте свой индекс массы тела (вес/рост). Пример: вес = 53 кг, рост = 1,58 м, формула расчета: вес / (рост в квадрате) = 53/2,496 = 21,23',
+      description:
+        'В первую очередь лишний вес влияет на сердечно-сосудистую систему. Атеросклероз, гипертония, ишемия, а также инфаркт миокарда — очень частые спутники ожирения.',
+      answers: [
+        { answer: 'От 18 до 24', points: 0 },
+        { answer: 'От 25 до 30', points: 1 },
+        { answer: 'От 30 и более', points: 2 },
+      ],
+    },
+    q8: {
+      question:
+        ' Есть ли в Вашей жизни физические нагрузки (пешие прогулки, бег, спорт, растяжка, йога)?',
+      description:
+        'Для поддержания здорового состояния сердечно-сосудистой системы необходима регулярная физическая активность, минимум в течение получаса ежедневно; физическая активность в течение одного часа несколько раз в неделю способствует поддержанию здорового веса.',
+      answers: [
+        {
+          answer:
+            'Пешие прогулки, бег, спорт, растяжка, йога в течение получаса ежедневно',
+          points: 0,
+        },
+        { answer: 'Отсутствие физической нагрузки', points: 1 },
+      ],
+    },
+    q9: {
+      question:
+        'Замечали ли Вы у себя повышение артериального давления (в том числе однократное) до показателя более 140/90 мм рт. ст.?',
+      description:
+        'Очень важно контролировать свое кровяное давление. Даже высокое кровяное давление может не сопровождаться какими-либо симптомами, но может привести к внезапному инсульту или инфаркту.',
+      answers: [
         { answer: 'Да', points: 0 },
         { answer: 'Нет', points: 1 },
       ],
     },
-    q5: {
-      question: 'НОСИТ ЛИ ВАША ЖИЗНЬ СТРЕССОВЫЙ ХАРАКТЕР?',
+    q10: {
+      question: 'Замечали ли вы у себя какое-либо из перечисленных состояний?',
+      description: [
+        '- одышка при привычной физической нагрузке',
+        '- головные боли, боли в грудной клетке при волнении/физической нагрузке',
+        '- отеки нижних конечностей',
+        '- повышенная утомляемость',
+        '- снижение переносимости физической/умственной нагрузки',
+        '- нарушения сна',
+      ],
       answers: [
-        { answer: 'Да', points: 0 },
-        { answer: 'Нет', points: 1 },
+        { answer: 'Нет', points: 0 },
+        { answer: 'Да', points: 1 },
       ],
     },
   };
@@ -74,36 +153,79 @@ function App() {
     });
   };
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    console.log('Survey responses:', responses);
+  const handleTextChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    console.log(e.target.name);
+    const { name, value } = e.target;
+    setResponses({
+      ...responses,
+      [name]: value,
+    });
   };
 
-  console.log(responses);
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    setPoints(
+      Object.values(responses)
+        .slice(1)
+        .reduce((acc, elem) => (acc += +elem), 0)
+    );
+    console.log(responses);
+    setModalOpen(true);
+  };
 
   return (
-    <div className={styles.wrapper}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        {Object.keys(responses).map((question, index) => (
-          <div key={index}>
-            <label className={styles.question}>
-              Вопрос {index + 1}: {questions[question].question}
-              <select name={question} value={responses[question]} onChange={handleChange}>
-                <option value='' disabled>
-                  Выберите вариант ответа
-                </option>
-                {questions[question].answers.map((el, i) => (
-                  <option key={i} value={el.points}>
-                    {el.answer}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        ))}
-        <button type='submit'>Submit</button>
-      </form>
-    </div>
+    <>
+      <div className={styles.wrapper}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          {Object.keys(responses).map((question, index) => (
+            <div className={styles.questionContainer} key={index}>
+              <label className={styles.question}>
+                <div>
+                  Вопрос {index + 1}: {questions[question].question}
+                </div>
+                <div className={styles.description}>
+                  {questions[question].description &&
+                    !Array.isArray(questions[question].description) &&
+                    questions[question].description}
+                  {questions[question].description &&
+                    Array.isArray(questions[question].description) &&
+                    questions[question].description.map((el) => (
+                      <div key={el}>{el}</div>
+                    ))}
+                </div>
+                {!questions[question].answers && (
+                  <input
+                    name={question}
+                    value={responses[question]}
+                    onChange={handleTextChange}
+                  ></input>
+                )}
+                {questions[question].answers && (
+                  <select
+                    name={question}
+                    value={responses[question]}
+                    onChange={handleChange}
+                  >
+                    <option value='' disabled>
+                      Выберите вариант ответа
+                    </option>
+                    {questions[question].answers.map((el, i) => (
+                      <option key={i} value={el.points}>
+                        {el.answer}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </label>
+            </div>
+          ))}
+          <button className={styles.submitButton} type='submit'>
+            Отправить ответы
+          </button>
+        </form>
+      </div>
+      <Modal open={modalOpen} setOpen={setModalOpen} points={points} />
+    </>
   );
 }
 
