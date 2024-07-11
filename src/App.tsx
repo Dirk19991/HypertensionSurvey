@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './App.module.scss';
 import Modal from './Modal';
+import { useForm, SubmitHandler } from 'react-hook-form';
 
 interface Responses {
   [key: string]: string;
@@ -17,22 +18,29 @@ interface Questions {
   };
 }
 
+type Inputs = {
+  [key: string]: string;
+};
+
 function App() {
-  const [responses, setResponses] = useState<Responses>({
-    q0: '',
-    q1: '',
-    q2: '',
-    q3: '',
-    q4: '',
-    q5: '',
-    q6: '',
-    q7: '',
-    q8: '',
-    q9: '',
-    q10: '',
-  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<Inputs>();
+
   const [modalOpen, setModalOpen] = useState(false);
   const [points, setPoints] = useState(0);
+
+  const onSubmit: SubmitHandler<Inputs> = (data) => {
+    setPoints(
+      Object.values(data)
+        .slice(1)
+        .reduce((acc, elem) => (acc += +elem), 0)
+    );
+    setModalOpen(true);
+  };
 
   const questions: Questions = {
     q0: {
@@ -83,7 +91,7 @@ function App() {
       answers: [
         {
           answer:
-            'Питаюсь в одно  тоже время, до 4-5 раз в сутки, соблюдаю солевой и питьевой режим.',
+            'Питаюсь в одно и то же время, до 4-5 раз в сутки, соблюдаю солевой и питьевой режим.',
           points: 0,
         },
         {
@@ -99,14 +107,14 @@ function App() {
       description:
         'В первую очередь лишний вес влияет на сердечно-сосудистую систему. Атеросклероз, гипертония, ишемия, а также инфаркт миокарда — очень частые спутники ожирения.',
       answers: [
-        { answer: 'От 18 до 24', points: 0 },
+        { answer: 'От 18 до 24', points: 0 },
         { answer: 'От 25 до 30', points: 1 },
         { answer: 'От 30 и более', points: 2 },
       ],
     },
     q8: {
       question:
-        ' Есть ли в Вашей жизни физические нагрузки (пешие прогулки, бег, спорт, растяжка, йога)?',
+        'Есть ли в Вашей жизни физические нагрузки (пешие прогулки, бег, спорт, растяжка, йога)?',
       description:
         'Для поддержания здорового состояния сердечно-сосудистой системы необходима регулярная физическая активность, минимум в течение получаса ежедневно; физическая активность в течение одного часа несколько раз в неделю способствует поддержанию здорового веса.',
       answers: [
@@ -145,39 +153,11 @@ function App() {
     },
   };
 
-  const handleChange: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
-    const { name, value } = e.target;
-    setResponses({
-      ...responses,
-      [name]: value,
-    });
-  };
-
-  const handleTextChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    console.log(e.target.name);
-    const { name, value } = e.target;
-    setResponses({
-      ...responses,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    setPoints(
-      Object.values(responses)
-        .slice(1)
-        .reduce((acc, elem) => (acc += +elem), 0)
-    );
-    console.log(responses);
-    setModalOpen(true);
-  };
-
   return (
     <>
       <div className={styles.wrapper}>
-        <form className={styles.form} onSubmit={handleSubmit}>
-          {Object.keys(responses).map((question, index) => (
+        <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+          {Object.keys(questions).map((question, index) => (
             <div className={styles.questionContainer} key={index}>
               <label className={styles.question}>
                 <div>
@@ -189,22 +169,19 @@ function App() {
                     questions[question].description}
                   {questions[question].description &&
                     Array.isArray(questions[question].description) &&
-                    questions[question].description.map((el) => (
-                      <div key={el}>{el}</div>
+                    questions[question].description.map((el, i) => (
+                      <div key={i}>{el}</div>
                     ))}
                 </div>
-                {!questions[question].answers && (
+                {!questions[question].answers ? (
                   <input
-                    name={question}
-                    value={responses[question]}
-                    onChange={handleTextChange}
-                  ></input>
-                )}
-                {questions[question].answers && (
+                    {...register(`q${index}`, { required: true })}
+                    defaultValue=''
+                  />
+                ) : (
                   <select
-                    name={question}
-                    value={responses[question]}
-                    onChange={handleChange}
+                    defaultValue={''}
+                    {...register(`q${index}`, { required: true })}
                   >
                     <option value='' disabled>
                       Выберите вариант ответа
@@ -215,6 +192,11 @@ function App() {
                       </option>
                     ))}
                   </select>
+                )}
+                {errors[`q${index}`]?.type === 'required' && (
+                  <p className={styles.error} role='alert'>
+                    Ответ обязателен
+                  </p>
                 )}
               </label>
             </div>
