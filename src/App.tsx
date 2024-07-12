@@ -57,6 +57,7 @@ function App() {
       answers: [
         { answer: 'Да', points: 1 },
         { answer: 'Нет', points: 0 },
+        { answer: 'Не знаю', points: 0 },
       ],
     },
     q3: {
@@ -142,8 +143,8 @@ function App() {
         '- нарушения сна',
       ],
       answers: [
-        { answer: 'Нет', points: 0 },
         { answer: 'Да', points: 1 },
+        { answer: 'Нет', points: 0 },
       ],
     },
   };
