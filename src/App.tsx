@@ -2,6 +2,10 @@ import { useState } from 'react';
 import styles from './App.module.scss';
 import Modal from './Modal';
 import { useForm, SubmitHandler } from 'react-hook-form';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-expect-error
+import { db } from './firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 interface Questions {
   [key: string]: {
@@ -28,12 +32,24 @@ function App() {
   const [modalOpen, setModalOpen] = useState(false);
   const [points, setPoints] = useState(0);
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setPoints(
       Object.values(data)
         .slice(1)
         .reduce((acc, elem) => (acc += +elem), 0)
     );
+    try {
+      const docRef = await addDoc(collection(db, 'users'), {
+        name: data['q0'],
+        points: +Object.values(data)
+          .slice(1)
+          .reduce((acc, elem) => (acc += +elem), 0),
+      });
+      console.log('Document written with ID: ', docRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+
     setModalOpen(true);
   };
 
@@ -61,8 +77,7 @@ function App() {
       ],
     },
     q3: {
-      question:
-        'Страдаете ли Вы сахарным диабетом или почечной недостаточностью?',
+      question: 'Страдаете ли Вы сахарным диабетом или почечной недостаточностью?',
       answers: [
         { answer: 'Да', points: 1 },
         { answer: 'Нет', points: 0 },
@@ -86,8 +101,7 @@ function App() {
       question: 'Правильно ли Вы питаетесь?',
       answers: [
         {
-          answer:
-            'Питаюсь в одно и то же время, до 4-5 раз в сутки, соблюдаю солевой и питьевой режим.',
+          answer: 'Питаюсь в одно и то же время, до 4-5 раз в сутки, соблюдаю солевой и питьевой режим.',
           points: 0,
         },
         {
@@ -109,17 +123,19 @@ function App() {
       ],
     },
     q8: {
-      question:
-        'Есть ли в Вашей жизни физические нагрузки (пешие прогулки, бег, спорт, растяжка, йога)?',
+      question: 'Есть ли в Вашей жизни физические нагрузки (пешие прогулки, бег, спорт, растяжка, йога)?',
       description:
         'Для поддержания здорового состояния сердечно-сосудистой системы необходима регулярная физическая активность, минимум в течение получаса ежедневно; физическая активность в течение одного часа несколько раз в неделю способствует поддержанию здорового веса.',
       answers: [
         {
-          answer:
-            'Пешие прогулки, бег, спорт, растяжка, йога в течение получаса ежедневно',
+          answer: 'Пешие прогулки, бег, спорт, растяжка, йога в течение получаса ежедневно',
           points: 0,
         },
-        { answer: 'Отсутствие физической нагрузки', points: 1 },
+        {
+          answer: 'Нерегулярная физическая нагрузка',
+          points: 1,
+        },
+        { answer: 'Отсутствие физической нагрузки', points: 2 },
       ],
     },
     q9: {
@@ -165,21 +181,12 @@ function App() {
                     questions[question].description}
                   {questions[question].description &&
                     Array.isArray(questions[question].description) &&
-                    questions[question].description.map((el, i) => (
-                      <div key={i}>{el}</div>
-                    ))}
+                    questions[question].description.map((el, i) => <div key={i}>{el}</div>)}
                 </div>
                 {!questions[question].answers ? (
-                  <input
-                    {...register(`q${index}`, { required: true })}
-                    defaultValue=''
-                  />
+                  <input {...register(`q${index}`, { required: true })} defaultValue='' />
                 ) : (
-                  <select
-                    className={styles.select}
-                    defaultValue={''}
-                    {...register(`q${index}`, { required: true })}
-                  >
+                  <select className={styles.select} defaultValue={''} {...register(`q${index}`, { required: true })}>
                     <option value='' disabled>
                       Выберите вариант ответа
                     </option>
