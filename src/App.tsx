@@ -31,6 +31,7 @@ function App() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [points, setPoints] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setPoints(
@@ -38,16 +39,19 @@ function App() {
         .slice(1)
         .reduce((acc, elem) => (acc += +elem), 0)
     );
+    setLoading(true);
     try {
-      const docRef = await addDoc(collection(db, 'users'), {
+      await addDoc(collection(db, 'users'), {
         name: data['q0'],
         points: +Object.values(data)
           .slice(1)
           .reduce((acc, elem) => (acc += +elem), 0),
       });
-      console.log('Document written with ID: ', docRef.id);
+
+      setLoading(false);
     } catch (error) {
       console.error('Error adding document: ', error);
+      setLoading(false);
     }
 
     setModalOpen(true);
@@ -206,7 +210,7 @@ function App() {
             </div>
           ))}
           <button className={styles.submitButton} type='submit'>
-            Отправить ответы
+            {loading ? <div className={styles.loader}></div> : <div>Отправить ответы</div>}
           </button>
         </form>
       </div>
