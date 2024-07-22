@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDbJrA21W5qhvmLbrxpqfIphO8dpdKbWXY',
+  apiKey: import.meta.env.VITE_API_KEY,
   authDomain: 'hypertension-survey-7c2a5.firebaseapp.com',
   projectId: 'hypertension-survey-7c2a5',
   storageBucket: 'hypertension-survey-7c2a5.appspot.com',
